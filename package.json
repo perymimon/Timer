@@ -1,10 +1,12 @@
 {
-  "name": "timer",
+  "name": "@perymimon/timer",
+  "email": "pery.mimon@gmail.com",
   "version": "1.0.0",
   "description": "Timer module, with tick event and some useful methods",
   "main": "src/timer.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish": "npm publish"
   },
   "repository": {
     "type": "git",
