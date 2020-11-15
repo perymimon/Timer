@@ -70,7 +70,7 @@ export default class Timer {
         this.time = this.orginalTime;
     }
 
-    tick(callback, time) {
+    tick(time, callback) {
         this[tickQueue].push([callback, time]);
         igniteNotify.call(this, callback, time);
     }
@@ -100,7 +100,8 @@ function coolNotify() {
 }
 
 function igniteNotify(callback, time) {
-    let t , me = this;
+    let t, me = this;
+
     function cycle() {
         if (!me) return;
         t = setTimeout(() => {
