@@ -4,7 +4,7 @@ const tickQueue = Symbol('tick queue');
 const debugName = Symbol('debug name');
 const COOL_NOTIFY_TIMER = Symbol('cool notify timer');
 
-export class Timer {
+export default class Timer {
     constructor(time, callback, autostart) {
         this.orginalTime = this.time = time;
         this.callback = callback;
@@ -25,7 +25,7 @@ export class Timer {
         coolNotify.call(this);
         this.timer = null;
         this.endTime = Date.now();
-        let timepass = this.endTime - this.startTime;
+        // let timepass = this.endTime - this.startTime;
     }
 
     setTime(newTime) {

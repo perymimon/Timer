@@ -1,0 +1,24 @@
+{
+  "name": "timer",
+  "version": "1.0.0",
+  "description": "Timer module, with tick event and some useful methods",
+  "main": "src/timer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perymimon/Timer.git"
+  },
+  "keywords": [
+    "js",
+    "timer",
+    "microlib"
+  ],
+  "author": "pery mimon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/perymimon/Timer/issues"
+  },
+  "homepage": "https://github.com/perymimon/Timer#readme"
+}
