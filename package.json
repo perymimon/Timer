@@ -6,7 +6,7 @@
   "main": "src/timer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "publish": "npm publish --access public"
+    "publish": "npm version patch & npm publish --access public"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "timer",
     "microlib"
   ],
-  "author": "pery mimon",
+  "author": "Pery Mimon",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/perymimon/Timer/issues"

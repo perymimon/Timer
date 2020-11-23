@@ -39,6 +39,13 @@ time is the time
 stop the timer, stop to notify about the pastime. 
 remember the progress and continue it after calls `resume()`
 
+### stop(whenStop = 1, lastTick = true)
+stop the timer.
+On that point it can be choose on which point on the
+timer progress to stop the timer from 0-1. 
+`lastTick` is about to call or not last time the callbacks of all tick callback. 
+
+
 ### resume()  
 resume timer after a pause.
 not ops when call when timer already work. 
