@@ -2,7 +2,7 @@ const DONE = Symbol('Done');
 const thenQueue = Symbol('then queue');
 const tickQueue = Symbol('tick queue');
 const debugName = Symbol('debug name');
-const COOL_NOTIFY_TIMER = Symbol('cool notify timer');
+const CLEAR_TICK_TIMERS = Symbol('cool notify timer');
 
 export default class Timer {
     constructor(time, callback, autostart) {
@@ -11,7 +11,7 @@ export default class Timer {
         this.timer = null;
         this[thenQueue] = [];
         this[tickQueue] = [];
-        this[COOL_NOTIFY_TIMER] = [];
+        this[CLEAR_TICK_TIMERS] = [];
         this.finishedCounter = 0;
         autostart && this.restart();
     }
@@ -20,12 +20,11 @@ export default class Timer {
         this[debugName] = name;
     }
 
-    stop() {
-        clearTimeout(this.timer);
-        coolNotify.call(this);
-        this.timer = null;
-        this.endTime = Date.now();
-        // let timepass = this.endTime - this.startTime;
+    stop(whenStop = 1, lastTick = true) {
+        this.pause();
+        this.endTime = this.startTime + whenStop * this.time;
+        lastTick && lastTimeNotify.call(this);
+        this[debugName] && console.log('timer', this[debugName], ':stop');
     }
 
     setTime(newTime) {
@@ -57,7 +56,11 @@ export default class Timer {
 
     pause() {
         this[debugName] && console.log('timer', this[debugName], ':pause');
-        this.stop();
+        clearTimeout(this.timer);
+        coolNotify.call(this);
+        this.timer = null;
+        this.endTime = Date.now();
+
     }
 
     resume() {
@@ -75,9 +78,14 @@ export default class Timer {
         igniteNotify.call(this, callback, time);
     }
 
+    clearTicks() {
+        coolNotify.call(this);
+        this[tickQueue] = [];
+    }
+
     get progress() {
         let now = this.timer ? Date.now() : this.endTime;
-        let t = ((now - this.startTime) / this.orginalTime) * 100;
+        let t = ((now - this.startTime) / this.orginalTime);
         return t;
     }
 
@@ -95,8 +103,8 @@ function runThenQueu() {
 }
 
 function coolNotify() {
-    this[COOL_NOTIFY_TIMER].forEach(clear => clear());
-    this[COOL_NOTIFY_TIMER] = [];
+    this[CLEAR_TICK_TIMERS].forEach(clear => clear());
+    this[CLEAR_TICK_TIMERS] = [];
 }
 
 function igniteNotify(callback, time) {
@@ -104,6 +112,7 @@ function igniteNotify(callback, time) {
 
     function cycle() {
         if (!me) return;
+        clearTimeout(t);
         t = setTimeout(() => {
             requestAnimationFrame(function () {
                 callback();
@@ -118,7 +127,7 @@ function igniteNotify(callback, time) {
         clearTimeout(t);
     }
 
-    this[COOL_NOTIFY_TIMER].push(clear);
+    this[CLEAR_TICK_TIMERS].push(clear);
     return clear;
 }
 

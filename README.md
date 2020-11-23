@@ -46,8 +46,8 @@ not ops when call when timer already work.
 ### tick(cb:fn, time:number(ms))
 trigger the callback every `time`ms and in the end of the timer run
 
-### get progress : number (0-100)
-return the progress of the timer in percentage 
+### get progress : number (0-1)
+return the progress of the timer between 0-1 
 
 
 
