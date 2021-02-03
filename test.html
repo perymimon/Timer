@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+</head>
+<body>
+<div id="$console">
+
+</div>
+<script type="module">
+    import Timer from './src/timer.js';
+    const timer = new Timer(5 * 1000);
+    let counter = 0;
+    timer.tick( 100, _=>{
+        $console.innerText = counter++;
+    } )
+    timer.restart();
+    //Timer
+</script>
+</body>
+</html>

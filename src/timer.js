@@ -1,30 +1,30 @@
 const DONE = Symbol('Done');
-const thenQueue = Symbol('then queue');
-const tickQueue = Symbol('tick queue');
-const debugName = Symbol('debug name');
-const CLEAR_TICK_TIMERS = Symbol('cool notify timer');
+const THEN_QUEUE = Symbol('then queue');
+const TICK_QUEUE = Symbol('tick queue');
+const DEBUG_NAME = Symbol('debug name');
+const STOP_TICKS = Symbol('cool notify timer');
 
 export default class Timer {
     constructor(time, callback, autostart) {
         this.orginalTime = this.time = time;
         this.callback = callback;
         this.timer = null;
-        this[thenQueue] = [];
-        this[tickQueue] = [];
-        this[CLEAR_TICK_TIMERS] = [];
+        this[THEN_QUEUE] = [];
+        this[TICK_QUEUE] = [];
+        this[STOP_TICKS] = [];
         this.finishedCounter = 0;
         autostart && this.restart();
     }
 
     debug(name) {
-        this[debugName] = name;
+        this[DEBUG_NAME] = name;
     }
 
     stop(whenStop = 1, lastTick = true) {
         this.pause();
         this.endTime = this.startTime + whenStop * this.time;
         lastTick && lastTimeNotify.call(this);
-        this[debugName] && console.log('timer', this[debugName], ':stop');
+        this[DEBUG_NAME] && console.log('timer', this[DEBUG_NAME], ':stop');
     }
 
     setTime(newTime) {
@@ -39,8 +39,6 @@ export default class Timer {
         this.startTime = Date.now();
         this.endTime = this.startTime;
 
-        igniteAllNotify.call(this);
-
         this.timer = setTimeout(() => {
             this.finishedCounter++;
             this.stop();
@@ -48,14 +46,15 @@ export default class Timer {
             this[DONE] = true;
             this.callback && this.callback();
             lastTimeNotify.call(this);
-            runThenQueu.call(this);
+            runThenableQueue.call(this);
         }, this.time);
 
+        igniteAllNotify.call(this);
 
     }
 
     pause() {
-        this[debugName] && console.log('timer', this[debugName], ':pause');
+        this[DEBUG_NAME] && console.log('timer', this[DEBUG_NAME], ':pause');
         clearTimeout(this.timer);
         coolNotify.call(this);
         this.timer = null;
@@ -64,7 +63,7 @@ export default class Timer {
     }
 
     resume() {
-        this[debugName] && console.log('timer', this[debugName], ':resume');
+        this[DEBUG_NAME] && console.log('timer', this[DEBUG_NAME], ':resume');
         if (this.timer) return;
         let timePass = this.endTime - this.startTime;
         this.time = this.orginalTime - timePass;
@@ -74,13 +73,14 @@ export default class Timer {
     }
 
     tick(time, callback) {
-        this[tickQueue].push([callback, time]);
-        igniteNotify.call(this, callback, time);
+        this[TICK_QUEUE].push([callback, time]);
+        const stopNotify = igniteNotify.call(this, callback, time);
+        this[STOP_TICKS].push(stopNotify);
     }
 
-    clearTicks() {
+    stopTicks() {
         coolNotify.call(this);
-        this[tickQueue] = [];
+        this[TICK_QUEUE] = [];
     }
 
     get progress() {
@@ -90,53 +90,52 @@ export default class Timer {
     }
 
     then(res, rej) {
-        this[thenQueue].push(res);
+        this[THEN_QUEUE].push(res);
         if (this[DONE]) {
-            runThenQueu.call(this)
+            runThenableQueue.call(this)
         }
     }
 }
 
-function runThenQueu() {
-    this[thenQueue].forEach(callback => callback());
-    this[thenQueue] = [];
+function runThenableQueue() {
+    this[THEN_QUEUE].forEach(callback => callback());
+    this[THEN_QUEUE] = [];
 }
 
 function coolNotify() {
-    this[CLEAR_TICK_TIMERS].forEach(clear => clear());
-    this[CLEAR_TICK_TIMERS] = [];
+    this[STOP_TICKS].forEach(clear => clear());
+    this[STOP_TICKS] = [];
 }
 
-function igniteNotify(callback, time) {
-    let t, me = this;
+function igniteNotify(callback, tickTime) {
+    let timer;
 
-    function cycle() {
-        if (!me) return;
-        clearTimeout(t);
-        t = setTimeout(() => {
+    const cycle = () => {
+        if (!this.timer) return;
+        clearTimeout(timer);
+        const timePass = ( Date.now() - this.startTime);
+        /*align the tick notification slots with the progress of the timer*/
+        const timeLeft = tickTime - (timePass % tickTime);
+        timer = setTimeout(() => {
             requestAnimationFrame(function () {
                 callback();
-                cycle()
+                cycle();
             })
-        }, time)
+        }, timeLeft)
     }
 
     cycle();
 
-    function clear() {
-        clearTimeout(t);
-    }
-
-    this[CLEAR_TICK_TIMERS].push(clear);
-    return clear;
+    return /*stopTimer*/()=> clearTimeout(timer);
 }
 
 function lastTimeNotify() {
-    this[tickQueue].forEach(args => args[0/*callback*/]());  //wtf: what that it do ?
+    this[TICK_QUEUE].forEach(([callback]) => callback());
 }
 
 function igniteAllNotify() {
-    return this[tickQueue].map(args => igniteNotify.apply(this, args));
+    this[STOP_TICKS] = this[TICK_QUEUE].map(args => igniteNotify.apply(this, args));
+    return  this[STOP_TICKS];
 }
 
 /**--------------SIMPLE TIMER------------------**/
